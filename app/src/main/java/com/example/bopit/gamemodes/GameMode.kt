@@ -1,4 +1,4 @@
-package com.example.bopit
+package com.example.bopit.gamemodes
 
 import android.content.Context
 import android.widget.FrameLayout

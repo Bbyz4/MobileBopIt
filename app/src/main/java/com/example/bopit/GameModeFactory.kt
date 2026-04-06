@@ -2,6 +2,8 @@ package com.example.bopit
 
 import android.content.Context
 import android.widget.FrameLayout
+import com.example.bopit.gamemodes.GameMode
+import com.example.bopit.gamemodes.MultitapGameMode
 
 object GameModeFactory
 {
@@ -9,7 +11,9 @@ object GameModeFactory
     {
         return when (modeID)
         {
-            0 -> throw IllegalArgumentException("Unknown mode")
+            0 -> MultitapGameMode(context, container)
+            1 -> MultitapGameMode(context, container)
+            2 -> MultitapGameMode(context, container)
             else -> throw IllegalArgumentException("Unknown mode")
         }
     }
