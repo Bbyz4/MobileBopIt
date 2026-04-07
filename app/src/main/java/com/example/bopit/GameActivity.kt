@@ -1,16 +1,23 @@
 package com.example.bopit
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import kotlinx.coroutines.delay
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
 class GameActivity : AppCompatActivity()
 {
+    override fun onBackPressed()
+    {
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -28,17 +35,18 @@ class GameActivity : AppCompatActivity()
         val taskTitle = findViewById<TextView>(R.id.taskTitle)
         val taskDescription = findViewById<TextView>(R.id.taskDescription)
 
+        var totalScore = 0
+
         lifecycleScope.launch{
 
             Log.d("GAME", "Game starting in 5 seconds")
             delay(5000)
 
-            var totalScore = 0
             scoreText.text = "Score: $totalScore"
 
             for ((index, step) in pattern.withIndex()) {
 
-                Log.d("GAME", "Starting round $index (mode=${step.taskID}")
+                Log.d("GAME", "Starting round $index (mode=${step.taskID})")
 
                 val gameModeDescriptor = GameModeFactory.Create(step.taskID, this@GameActivity, container)
 
@@ -57,8 +65,24 @@ class GameActivity : AppCompatActivity()
             }
 
             Log.d("GAME", "Game finished, final score $totalScore")
-        }
 
-        //do something at the end
+            ShowFinishedGameDialog(totalScore)
+        }
+    }
+
+    private fun ShowFinishedGameDialog(finalScore: Int)
+    {
+        AlertDialog.Builder(this)
+            .setTitle("Game finished!")
+            .setMessage("Your score: $finalScore")
+            .setCancelable(false)
+            .setPositiveButton("Back to Menu") {_,_ ->
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                startActivity(intent)
+                finish()
+            }
+            .show()
+
     }
 }
