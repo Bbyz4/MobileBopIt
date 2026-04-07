@@ -23,22 +23,32 @@ class GameActivity : AppCompatActivity()
         val generator = TaskPatternGenerator(data)
         val pattern = generator.GetRandomPattern()
 
+
+        val scoreText = findViewById<TextView>(R.id.scoreText)
+        val taskTitle = findViewById<TextView>(R.id.taskTitle)
+        val taskDescription = findViewById<TextView>(R.id.taskDescription)
+
         lifecycleScope.launch{
 
             Log.d("GAME", "Game starting in 5 seconds")
             delay(5000)
 
             var totalScore = 0
+            scoreText.text = "Score: $totalScore"
 
             for ((index, step) in pattern.withIndex()) {
 
                 Log.d("GAME", "Starting round $index (mode=${step.taskID}")
 
-                val gameMode = GameModeFactory.Create(step.taskID, this@GameActivity, container)
+                val gameModeDescriptor = GameModeFactory.Create(step.taskID, this@GameActivity, container)
 
-                val score = gameMode.run()
+                taskTitle.text = gameModeDescriptor.gameModeTitle
+                taskDescription.text = gameModeDescriptor.gameModeDesc
+
+                val score = gameModeDescriptor.gameModeInstance.run()
 
                 totalScore += score
+                scoreText.text = "Score: $totalScore"
 
                 Log.d("GAME", "Round $index score: $score")
                 Log.d("GAME", "Total score so far: $totalScore")
