@@ -4,62 +4,176 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/bg_dark"
     tools:context=".MainActivity">
 
+    <TextView
+        android:id="@+id/logoText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BOP IT"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_light"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="64dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:id="@+id/mainPanel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:layout_marginTop="160dp"
+        android:background="@drawable/panel_border"
         android:orientation="vertical"
-        android:padding="6dp">
+        android:padding="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/logoText">
 
-        <!-- Game Modes -->
-        <CheckBox
-            android:id="@+id/mode0"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Click Task"
-            />
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="12dp"
+            android:text="GAMEMODES"
+            android:textColor="@color/text_light"
+            android:textStyle="bold" />
 
-        <CheckBox
-            android:id="@+id/mode1"
-            android:layout_width="wrap_content"
+        <!-- CHECKBOX LIST -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Random Task 1"
-            />
+            android:orientation="vertical">
 
-        <CheckBox
-            android:id="@+id/mode2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Random Task 2"
-            />
-        <!-- - - - - - -->
+            <!-- Mode 0 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/mode0"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/checkbox_neon"
+                    android:button="@null" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="Click Task"
+                    android:textColor="@color/text_light" />
+            </LinearLayout>
+
+            <!-- Mode 1 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/mode1"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/checkbox_neon"
+                    android:button="@null" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="Random Task 1"
+                    android:textColor="@color/text_light" />
+            </LinearLayout>
+
+            <!-- Mode 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/mode2"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/checkbox_neon"
+                    android:button="@null" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="Random Task 2"
+                    android:textColor="@color/text_light" />
+            </LinearLayout>
+
+        </LinearLayout>
 
         <EditText
             android:id="@+id/roundsInput"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Round Number"
-            android:inputType="number"
+            android:layout_height="36dp"
             android:layout_marginTop="24dp"
-            />
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/input_neon"
+            android:hint="ROUND NUMBER"
+            android:inputType="number"
+            android:paddingLeft="12dp"
+            android:textColor="@color/text_light"
+            android:textColorHint="@color/text_light" />
 
         <EditText
             android:id="@+id/seedInput"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Seed (leave blank for random)"
-            android:inputType="number"
-            android:layout_marginTop="8dp"
-            />
-
-        <Button
-            android:id="@+id/startButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Singleplayer"
+            android:layout_height="36dp"
             android:layout_marginTop="24dp"
-            />
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/input_neon"
+            android:hint="SEED (LEAVE BLANK FOR RANDOM)"
+            android:inputType="number"
+            android:paddingLeft="12dp"
+            android:textColor="@color/text_light"
+            android:textColorHint="@color/text_light" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="24dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/mainPanel">
+
+            <Button
+                android:id="@+id/startButton"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:background="@drawable/button_neon"
+                android:text="SOLO"
+                android:textColor="@color/text_light" />
+
+            <Button
+                android:id="@+id/multiButton"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@drawable/button_neon"
+                android:text="HOST"
+                android:textColor="@color/text_light" />
+        </LinearLayout>
 
     </LinearLayout>
 

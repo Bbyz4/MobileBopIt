@@ -35,14 +35,16 @@ class GameActivity : AppCompatActivity()
         val taskTitle = findViewById<TextView>(R.id.taskTitle)
         val taskDescription = findViewById<TextView>(R.id.taskDescription)
 
+        taskTitle.text = "NO CHALLENGE"
+        taskDescription.text = "Be prepared..."
+
         var totalScore = 0
 
         lifecycleScope.launch{
 
-            Log.d("GAME", "Game starting in 5 seconds")
-            delay(5000)
-
             scoreText.text = "Score: $totalScore"
+
+            delay(1000)
 
             for ((index, step) in pattern.withIndex()) {
 
@@ -50,18 +52,21 @@ class GameActivity : AppCompatActivity()
 
                 val gameModeDescriptor = GameModeFactory.Create(step.taskID, this@GameActivity, container)
 
+                delay((step.delay * 1000).toLong())
+
                 taskTitle.text = gameModeDescriptor.gameModeTitle
                 taskDescription.text = gameModeDescriptor.gameModeDesc
 
                 val score = gameModeDescriptor.gameModeInstance.run()
+
+                taskTitle.text = "NO CHALLENGE"
+                taskDescription.text = "Be prepared..."
 
                 totalScore += score
                 scoreText.text = "Score: $totalScore"
 
                 Log.d("GAME", "Round $index score: $score")
                 Log.d("GAME", "Total score so far: $totalScore")
-
-                delay((step.delay * 1000).toLong())
             }
 
             Log.d("GAME", "Game finished, final score $totalScore")

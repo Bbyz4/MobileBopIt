@@ -7,6 +7,8 @@ import android.widget.FrameLayout
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.random.Random
 import kotlin.coroutines.resume
+import android.widget.ImageView
+import com.example.bopit.R
 
 class MultitapGameMode(
     context: Context,
@@ -19,12 +21,12 @@ class MultitapGameMode(
         var clicks = 0
         var maxClicks = 10
 
-        val activeTargets = mutableListOf<Button>()
+        val activeTargets = mutableListOf<ImageView>()
 
         fun spawnTarget()
         {
-            val button = Button(context)
-            button.text = "Tap"
+            val button = ImageView(context)
+            button.setImageResource(R.drawable.target)
 
             val size = 200
 
@@ -39,6 +41,8 @@ class MultitapGameMode(
 
             button.x = x.toFloat()
             button.y = y.toFloat()
+
+            button.scaleType = ImageView.ScaleType.FIT_CENTER
 
             container.addView(button)
             activeTargets.add(button)
@@ -71,7 +75,7 @@ class MultitapGameMode(
             }
         }
 
-        repeat(3)
+        repeat(2)
         {
             spawnTarget()
         }
