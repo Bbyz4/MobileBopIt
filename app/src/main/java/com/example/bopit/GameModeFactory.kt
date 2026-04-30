@@ -4,6 +4,7 @@ import android.content.Context
 import android.widget.FrameLayout
 import com.example.bopit.gamemodes.GameMode
 import com.example.bopit.gamemodes.MultitapGameMode
+import com.example.bopit.gamemodes.TiltGameMode
 
 data class GameModeDescriptor (
     val gameModeInstance : GameMode,
@@ -13,13 +14,19 @@ data class GameModeDescriptor (
 
 object GameModeFactory
 {
+    var N = 2
+
+    fun GetGamemodeNumber() : Int
+    {
+        return N
+    }
+
     fun Create(modeID: Int, context: Context, container: FrameLayout): GameModeDescriptor
     {
         return when (modeID)
         {
             0 -> GameModeDescriptor(MultitapGameMode(context, container), "TAP IT!", "Click on 10 targets as fast as you can (0)")
-            1 -> GameModeDescriptor(MultitapGameMode(context, container), "TAP IT!", "Same thing, different ID (1)")
-            2 -> GameModeDescriptor(MultitapGameMode(context, container), "TAP IT!", "Same thing, different ID (2)")
+            1 -> GameModeDescriptor(TiltGameMode(context, container), "TILT IT!", "Tilt your device to the given angle (1)")
             else -> throw IllegalArgumentException("Unknown mode")
         }
     }

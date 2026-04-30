@@ -10,7 +10,7 @@ import kotlin.random.Random
 
 class MainActivity : AppCompatActivity()
 {
-    final val N = 3
+    final val N = GameModeFactory.GetGamemodeNumber()
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
