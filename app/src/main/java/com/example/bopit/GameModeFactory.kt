@@ -2,10 +2,7 @@ package com.example.bopit
 
 import android.content.Context
 import android.widget.FrameLayout
-import com.example.bopit.gamemodes.GameMode
-import com.example.bopit.gamemodes.MultitapGameMode
-import com.example.bopit.gamemodes.TiltGameMode
-import com.example.bopit.gamemodes.VoiceGameMode
+import com.example.bopit.gamemodes.*
 
 data class GameModeDescriptor (
     val gameModeInstance : GameMode,
@@ -15,7 +12,7 @@ data class GameModeDescriptor (
 
 object GameModeFactory
 {
-    var N = 2
+    var N = 4
 
     fun GetGamemodeNumber() : Int
     {
@@ -29,6 +26,7 @@ object GameModeFactory
             0 -> GameModeDescriptor(MultitapGameMode(context, container), "TAP IT!", "Click on 10 targets as fast as you can (0)")
             1 -> GameModeDescriptor(TiltGameMode(context, container), "TILT IT!", "Tilt your device to the given angle (1)")
             2 -> GameModeDescriptor(VoiceGameMode(context, container), "SCREAM IT!", "Speak at given volume (2)")
+            3 -> GameModeDescriptor(ShakeGameMode(context, container), "SHAKE IT!", "Shake your device for 5 seconds (3)")
             else -> throw IllegalArgumentException("Unknown mode")
         }
     }

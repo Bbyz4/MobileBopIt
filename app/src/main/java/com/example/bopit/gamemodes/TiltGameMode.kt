@@ -8,6 +8,7 @@ import android.hardware.SensorManager
 import android.os.SystemClock
 import android.util.Log
 import android.widget.FrameLayout
+import com.example.bopit.R
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.math.abs
@@ -27,7 +28,7 @@ class TiltGameMode(
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
 
         val targetAngle = Random.nextDouble(0.0, 360.0)
-        val tolerance = 20.0
+        val tolerance = 5.0
 
         val angleText = android.widget.TextView(context).apply {
             textSize = 24f
@@ -35,6 +36,47 @@ class TiltGameMode(
         }
 
         container.addView(angleText)
+
+        val createdViews = mutableListOf<android.view.View>()
+
+        container.post {
+
+            val wheelSize = 600
+            val targetSize = 80
+
+            val wheel = android.widget.ImageView(context).apply {
+                layoutParams = FrameLayout.LayoutParams(wheelSize, wheelSize)
+            }
+
+            container.addView(wheel)
+
+            wheel.x = (container.width - wheelSize) / 2f
+            wheel.y = (container.height - wheelSize) / 2f
+
+            val target = android.widget.ImageView(context).apply {
+                layoutParams = FrameLayout.LayoutParams(targetSize, targetSize)
+                setImageResource(R.drawable.target)
+            }
+
+            val radius = wheelSize / 2f - targetSize
+
+            val angleRad = Math.toRadians(targetAngle)
+
+            val centerX = wheel.x + wheelSize / 2f
+            val centerY = wheel.y + wheelSize / 2f
+
+            val targetX = centerX + radius * kotlin.math.cos(angleRad) - targetSize / 2
+            val targetY = centerY + radius * kotlin.math.sin(angleRad) - targetSize / 2
+
+            target.x = targetX.toFloat()
+            target.y = targetY.toFloat()
+
+            container.addView(target)
+
+            // keep references for cleanup
+            createdViews.add(wheel)
+            createdViews.add(target)
+        }
 
         fun angleDifference(a: Double, b: Double): Double
         {
@@ -67,6 +109,8 @@ class TiltGameMode(
                 {
                     sensorManager.unregisterListener(this)
                     container.removeView(angleText)
+                    createdViews.forEach { container.removeView(it) }
+                    createdViews.clear()
 
                     val elapsedMs = SystemClock.elapsedRealtime() - startTime
                     val elapsedSec = elapsedMs / 1000.0
@@ -75,7 +119,7 @@ class TiltGameMode(
 
                     if(cont.isActive)
                     {
-                        cont.resume(100)
+                        cont.resume(score)
                     }
                 }
             }
@@ -95,6 +139,8 @@ class TiltGameMode(
         cont.invokeOnCancellation {
             sensorManager.unregisterListener(listener)
             container.removeView(angleText)
+            createdViews.forEach { container.removeView(it) }
+            createdViews.clear()
         }
 
     }
