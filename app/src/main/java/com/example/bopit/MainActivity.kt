@@ -60,5 +60,12 @@ class MainActivity : AppCompatActivity()
                 startActivity(intent)
             }
         }
+
+        val historyButton = findViewById<Button>(R.id.historyButton)
+
+        historyButton.setOnClickListener {
+            val intent = Intent(this, HistoryActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
