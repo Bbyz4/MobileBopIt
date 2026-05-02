@@ -24,13 +24,6 @@ class ShakeGameMode(
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
-        val textView = TextView(context).apply {
-            textSize = 22f
-            text = "SHAKE!"
-        }
-
-        container.addView(textView)
-
         var shakeCount = 0
 
         var lastX = 0f
@@ -56,7 +49,6 @@ class ShakeGameMode(
                 if(currentDirection != 0 && currentDirection != lastDirection && force > threshold)
                 {
                     shakeCount++
-                    textView.text = "Shakes: $shakeCount"
                 }
 
                 lastDirection = currentDirection
@@ -79,7 +71,6 @@ class ShakeGameMode(
             delay(5000)
 
             sensorManager.unregisterListener(listener)
-            container.removeView(textView)
 
             val elapsedMs = SystemClock.elapsedRealtime() - startTime
 
@@ -94,7 +85,6 @@ class ShakeGameMode(
         cont.invokeOnCancellation {
             job.cancel()
             sensorManager.unregisterListener(listener)
-            container.removeView(textView)
         }
     }
 }

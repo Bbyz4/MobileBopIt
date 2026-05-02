@@ -134,7 +134,7 @@ class TiltGameMode(
                     val elapsedMs = SystemClock.elapsedRealtime() - startTime
                     val elapsedSec = elapsedMs / 1000.0
 
-                    val score = (100 - 10 * elapsedSec).toInt().coerceAtLeast(0)
+                    val score = (100 - 20 * elapsedSec).toInt().coerceAtLeast(0)
 
                     if(cont.isActive)
                     {

@@ -1,6 +1,7 @@
 package com.example.bopit
 
 import android.content.Intent
+import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -56,6 +57,13 @@ class GameActivity : AppCompatActivity()
 
                 taskTitle.text = gameModeDescriptor.gameModeTitle
                 taskDescription.text = gameModeDescriptor.gameModeDesc
+
+                val mediaPlayer = MediaPlayer.create(this@GameActivity, gameModeDescriptor.soundResId)
+                mediaPlayer.start()
+
+                mediaPlayer.setOnCompletionListener{
+                    it.release()
+                }
 
                 val score = gameModeDescriptor.gameModeInstance.run()
 
