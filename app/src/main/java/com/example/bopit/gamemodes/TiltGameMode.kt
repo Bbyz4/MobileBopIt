@@ -8,6 +8,7 @@ import android.hardware.SensorManager
 import android.os.SystemClock
 import android.util.Log
 import android.widget.FrameLayout
+import android.widget.ImageView
 import com.example.bopit.R
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
@@ -20,6 +21,31 @@ class TiltGameMode(
     container: FrameLayout
 ) : GameMode(context, container)
 {
+    var currentPointer: ImageView? = null
+    var uiReady = false
+
+    private fun SetImagePosition(image : ImageView, angle : Double)
+    {
+        val wheelSize = 600
+        val targetSize = 80
+
+        val wheelX = (container.width - wheelSize) / 2f
+        val wheelY = (container.height - wheelSize) / 2f
+
+        val radius = wheelSize / 2f - targetSize
+
+        val angleRad = Math.toRadians(angle)
+
+        val centerX = wheelX + wheelSize / 2f
+        val centerY = wheelY + wheelSize / 2f
+
+        val targetX = centerX + radius * kotlin.math.cos(angleRad) - targetSize / 2
+        val targetY = centerY + radius * kotlin.math.sin(angleRad) - targetSize / 2
+
+        image.x = targetX.toFloat()
+        image.y = targetY.toFloat()
+    }
+
     override suspend fun run(): Int = suspendCancellableCoroutine { cont ->
 
         val startTime = SystemClock.elapsedRealtime()
@@ -50,32 +76,29 @@ class TiltGameMode(
 
             container.addView(wheel)
 
-            wheel.x = (container.width - wheelSize) / 2f
-            wheel.y = (container.height - wheelSize) / 2f
-
             val target = android.widget.ImageView(context).apply {
                 layoutParams = FrameLayout.LayoutParams(targetSize, targetSize)
                 setImageResource(R.drawable.target)
             }
 
-            val radius = wheelSize / 2f - targetSize
-
-            val angleRad = Math.toRadians(targetAngle)
-
-            val centerX = wheel.x + wheelSize / 2f
-            val centerY = wheel.y + wheelSize / 2f
-
-            val targetX = centerX + radius * kotlin.math.cos(angleRad) - targetSize / 2
-            val targetY = centerY + radius * kotlin.math.sin(angleRad) - targetSize / 2
-
-            target.x = targetX.toFloat()
-            target.y = targetY.toFloat()
+            SetImagePosition(target, targetAngle)
 
             container.addView(target)
 
-            // keep references for cleanup
+            currentPointer = android.widget.ImageView(context).apply {
+                layoutParams = FrameLayout.LayoutParams(targetSize, targetSize)
+                setImageResource(R.drawable.target)
+            }
+
+            SetImagePosition(currentPointer!!, 0.0)
+
+            container.addView(currentPointer)
+
             createdViews.add(wheel)
             createdViews.add(target)
+            createdViews.add(currentPointer!!)
+
+            uiReady = true
         }
 
         fun angleDifference(a: Double, b: Double): Double
@@ -91,6 +114,8 @@ class TiltGameMode(
         {
             override fun onSensorChanged(event: SensorEvent)
             {
+                if (!uiReady) return
+
                 SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
                 SensorManager.getOrientation(rotationMatrix, orientation)
 
@@ -100,6 +125,8 @@ class TiltGameMode(
                 {
                     angle += 360
                 }
+
+                SetImagePosition(currentPointer!!, angle)
 
                 Log.d("TILT", "Current angle: $angle")
 
