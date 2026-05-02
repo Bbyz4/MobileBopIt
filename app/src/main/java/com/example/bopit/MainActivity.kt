@@ -6,11 +6,21 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import androidx.activity.result.contract.ActivityResultContracts
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity()
 {
-    final val N = GameModeFactory.GetGamemodeNumber()
+    private val N = GameModeFactory.GetGamemodeNumber()
+
+    private val requestAudioPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                startGamePendingIntent?.let { startActivity(it) }
+            }
+        }
+
+    private var startGamePendingIntent: Intent? = null
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -43,7 +53,12 @@ class MainActivity : AppCompatActivity()
             val intent = Intent(this, GameActivity::class.java)
             intent.putExtra("GAME_SETTINGS", data)
 
-            startActivity(intent)
+            if (gameModes.getOrNull(2) == true) {
+                startGamePendingIntent = intent
+                requestAudioPermission.launch(android.Manifest.permission.RECORD_AUDIO)
+            } else {
+                startActivity(intent)
+            }
         }
     }
 }

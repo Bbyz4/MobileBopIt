@@ -56,13 +56,6 @@ class TiltGameMode(
         val targetAngle = Random.nextDouble(0.0, 360.0)
         val tolerance = 5.0
 
-        val angleText = android.widget.TextView(context).apply {
-            textSize = 24f
-            text = "Tilt to: ${targetAngle.toInt()}°"
-        }
-
-        container.addView(angleText)
-
         val createdViews = mutableListOf<android.view.View>()
 
         container.post {
@@ -135,7 +128,6 @@ class TiltGameMode(
                 if(diff <= tolerance)
                 {
                     sensorManager.unregisterListener(this)
-                    container.removeView(angleText)
                     createdViews.forEach { container.removeView(it) }
                     createdViews.clear()
 
@@ -165,7 +157,6 @@ class TiltGameMode(
 
         cont.invokeOnCancellation {
             sensorManager.unregisterListener(listener)
-            container.removeView(angleText)
             createdViews.forEach { container.removeView(it) }
             createdViews.clear()
         }

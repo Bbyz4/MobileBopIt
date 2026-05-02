@@ -10,8 +10,10 @@ import android.os.SystemClock
 import android.provider.MediaStore.Audio
 import android.util.Log
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
+import com.example.bopit.R
 import kotlinx.coroutines.*
 import kotlin.coroutines.resume
 import kotlin.math.log10
@@ -23,9 +25,29 @@ class VoiceGameMode(
     container: FrameLayout
 ) : GameMode(context, container)
 {
+    var currentPointer: ImageView? = null
+    var uiReady = false
+
+    private fun SetImagePosition(image: ImageView, decibels: Double)
+    {
+        val baseX = container.width / 2f
+        val baseY = container.height / 2f
+
+        val scale = 5f
+
+        val y = baseY - (scale * decibels)
+
+        image.x = baseX - (image.width / 2f)
+        image.y = y.toFloat()
+    }
+
     override suspend fun run(): Int = suspendCancellableCoroutine { cont ->
 
+        val createdViews = mutableListOf<android.view.View>()
+
         val permission = android.Manifest.permission.RECORD_AUDIO
+
+        val targetSize = 80
 
         if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED)
         {
@@ -51,14 +73,28 @@ class VoiceGameMode(
             bufferSize
         )
 
-        val targetVolume = Random.nextInt(30, 80)
+        val targetVolume = Random.nextDouble(40.0, 80.0)
 
-        val textView = TextView(context).apply{
-            textSize = 22f
-            text = "Speak at volume: $targetVolume dB"
+        val target = android.widget.ImageView(context).apply {
+            layoutParams = FrameLayout.LayoutParams(targetSize, targetSize)
+            setImageResource(R.drawable.target)
         }
 
-        container.addView(textView)
+        SetImagePosition(target, targetVolume)
+
+        container.addView(target)
+
+        currentPointer = android.widget.ImageView(context).apply {
+            layoutParams = FrameLayout.LayoutParams(targetSize, targetSize)
+            setImageResource(R.drawable.target)
+        }
+
+        SetImagePosition(currentPointer!!, 0.0)
+
+        container.addView(currentPointer)
+
+        createdViews.add(target)
+        createdViews.add(currentPointer!!)
 
         val volumes = mutableListOf<Double>()
 
@@ -74,7 +110,7 @@ class VoiceGameMode(
 
             audioRecord.startRecording()
 
-            repeat(20) { i ->
+            repeat(100) { i ->
 
                 if(!isActive)
                 {
@@ -98,7 +134,9 @@ class VoiceGameMode(
 
                 Log.d("VOICE", "Current dB value: ${db.toInt()}")
 
-                delay(500)
+                SetImagePosition(currentPointer!!, db)
+
+                delay(100)
             }
 
             audioRecord.stop()
@@ -109,7 +147,11 @@ class VoiceGameMode(
 
             val score = (100 - diff * 2).toInt().coerceIn(0, 100)
 
-            container.removeView(textView)
+            withContext(Dispatchers.Main)
+            {
+                createdViews.forEach { container.removeView(it) }
+                createdViews.clear()
+            }
 
             val elapsedMs = SystemClock.elapsedRealtime() - startTime
 
@@ -122,7 +164,8 @@ class VoiceGameMode(
         cont.invokeOnCancellation {
             job.cancel()
             audioRecord.release()
-            container.removeView(textView)
+            createdViews.forEach { container.removeView(it) }
+            createdViews.clear()
         }
     }
 }
