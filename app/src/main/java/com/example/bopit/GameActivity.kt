@@ -10,6 +10,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import kotlinx.coroutines.delay
 import androidx.lifecycle.lifecycleScope
+import androidx.room.Room
+import com.example.bopit.data.AppDatabase
+import com.example.bopit.data.GameEntity
 import kotlinx.coroutines.launch
 
 class GameActivity : AppCompatActivity()
@@ -23,6 +26,12 @@ class GameActivity : AppCompatActivity()
     {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
+
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java,
+            "bopit-db"
+        ).build()
 
         val container = findViewById<FrameLayout>(R.id.gameContainer)
 
@@ -78,6 +87,19 @@ class GameActivity : AppCompatActivity()
             }
 
             Log.d("GAME", "Game finished, final score $totalScore")
+
+            db.gameDao().insertGameWithModes(
+                GameEntity(
+                    score = totalScore,
+                    seed = data.seed,
+                    gameTime = System.currentTimeMillis(),
+                    opponentName = null,
+                    opponentScore = null
+                ),
+                modes = data.gameModes.mapIndexedNotNull{ index, enabled ->
+                    if(enabled) index else null
+                }
+            )
 
             ShowFinishedGameDialog(totalScore)
         }
