@@ -9,6 +9,7 @@ data class GameEntity(
     val gameID: Int = 0,
 
     val score: Int,
+    val roundNumber: Int,
     val seed: Int,
     val gameTime: Long,
 

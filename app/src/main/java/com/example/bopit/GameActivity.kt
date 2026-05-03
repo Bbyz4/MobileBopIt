@@ -91,6 +91,7 @@ class GameActivity : AppCompatActivity()
             db.gameDao().insertGameWithModes(
                 GameEntity(
                     score = totalScore,
+                    roundNumber = data.rounds,
                     seed = data.seed,
                     gameTime = System.currentTimeMillis(),
                     opponentName = null,
