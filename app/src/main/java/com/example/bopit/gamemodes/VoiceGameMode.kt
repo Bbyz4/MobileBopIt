@@ -143,7 +143,7 @@ class VoiceGameMode(
             audioRecord.release()
 
             val avg = volumes.average()
-            val diff = kotlin.math.abs(avg - targetVolume)
+            val diff = kotlin.math.abs(avg - targetVolume) //to fix
 
             val score = (100 - diff * 2).toInt().coerceIn(0, 100)
 
