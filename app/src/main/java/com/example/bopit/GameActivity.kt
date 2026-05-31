@@ -71,7 +71,9 @@ class GameActivity : AppCompatActivity()
                     opponentScore = message.playerScore
                     if(gameFinished)
                     {
-                        showCombinedScoreDialog(opponentName)
+                        runOnUiThread {
+                            showCombinedScoreDialog(opponentName)
+                        }
                     }
                 }
             }
@@ -150,7 +152,6 @@ class GameActivity : AppCompatActivity()
                         .setTitle("Game finished!")
                         .setMessage("Your score: $totalScore \n Waiting for opponent...")
                         .setCancelable(false)
-                        .setPositiveButton("Back to Menu") {_, _ -> finishAndGoToMenu() }
                         .show()
                 }
             }

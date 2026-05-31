@@ -52,17 +52,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- 🧱 Placeholder items -->
-            <TextView
-                style="@style/TextAppearance.AppCompat"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Game 1 — Score: 85"
-                android:textColor="@color/text_light"
-                android:padding="12dp"
-                android:background="@drawable/panel_border"
-                android:layout_marginBottom="8dp"/>
-
 
 
         </LinearLayout>
