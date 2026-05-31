@@ -12,7 +12,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import com.example.bopit.data.AppDatabase
 import com.google.android.material.internal.ViewUtils.dpToPx
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class HistoryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,50 +33,17 @@ class HistoryActivity : AppCompatActivity() {
             "bopit-db"
         ).build()
 
-        lifecycleScope.launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             val games = db.gameDao().getAllGames()
-
             val container = findViewById<LinearLayout>(R.id.historyContainer)
 
-            games.forEach { game ->
-
+            for (game in games) {
                 val modes = db.gameDao().getModesForGame(game.gameID)
-
-                val text = "Normalized score: ${game.score.toDouble() / game.roundNumber.toDouble()} Raw score: ${game.score} | Modes: $modes"
-
-                val tv = TextView(this@HistoryActivity).apply {
-                    this.text = text
-
-                    setTextAppearance(androidx.appcompat.R.style.TextAppearance_AppCompat)
-
-                    setTextColor(
-                        ContextCompat.getColor(
-                            context,
-                            R.color.text_light
-                        )
-                    )
-
-                    setPadding(
-                        12,
-                        12,
-                        12,
-                        12
-                    )
-
-                    background = ContextCompat.getDrawable(
-                        context,
-                        R.drawable.panel_border
-                    )
-
-                    val params = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    )
-                    params.bottomMargin = 8
-                    layoutParams = params
+                // Build UI on the main thread
+                val itemView = createGameItemView(game, modes)
+                withContext(Dispatchers.Main) {
+                    container.addView(itemView)
                 }
-
-                container.addView(tv)
             }
         }
     }
@@ -127,7 +96,7 @@ class HistoryActivity : AppCompatActivity() {
         }
         else
         {
-            "MULTI vs ${game.opponentName}, Score: ${game.opponentScore ?: "?"}"
+            "MULTI vs ${game.opponentName}, Score: ${if ( game.roundNumber != 0) ((if (game.opponentScore != null) game.opponentScore.toDouble() / game.roundNumber.toDouble() else 0)) else 0}"
         }
         leftColumn.addView(
             TextView(context).apply{

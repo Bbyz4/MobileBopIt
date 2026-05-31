@@ -15,7 +15,9 @@ import com.example.bopit.bluetooth.BluetoothConnectionManager
 import com.example.bopit.bluetooth.BluetoothMessage
 import com.example.bopit.data.AppDatabase
 import com.example.bopit.data.GameEntity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class GameActivity : AppCompatActivity()
 {
@@ -72,7 +74,7 @@ class GameActivity : AppCompatActivity()
                     if(gameFinished)
                     {
                         runOnUiThread {
-                            showCombinedScoreDialog(opponentName)
+                            showCombinedScoreDialog(opponentName, data, db)
                         }
                     }
                 }
@@ -119,20 +121,6 @@ class GameActivity : AppCompatActivity()
             myScore = totalScore
             gameFinished = true
 
-            db.gameDao().insertGameWithModes(
-                GameEntity(
-                    score = totalScore,
-                    roundNumber = data.rounds,
-                    seed = data.seed,
-                    gameTime = System.currentTimeMillis(),
-                    opponentName = if (isMultiplayer) opponentName else null,
-                    opponentScore = opponentScore
-                ),
-                modes = data.gameModes.mapIndexedNotNull{ index, enabled ->
-                    if(enabled) index else null
-                }
-            )
-
             if(isMultiplayer)
             {
                 BluetoothConnectionManager.sendMessage(
@@ -144,25 +132,25 @@ class GameActivity : AppCompatActivity()
 
                 if(opponentScore != null)
                 {
-                    showCombinedScoreDialog(opponentName)
+                    showCombinedScoreDialog(opponentName, data, db)
                 }
                 else
                 {
                     finalDialog = AlertDialog.Builder(this@GameActivity)
                         .setTitle("Game finished!")
-                        .setMessage("Your score: $totalScore \n Waiting for opponent...")
+                        .setMessage("Your score: $totalScore \n Waiting for $opponentName...")
                         .setCancelable(false)
                         .show()
                 }
             }
             else
             {
-                ShowFinishedGameDialog(totalScore)
+                ShowFinishedGameDialog(totalScore, data, db)
             }
         }
     }
 
-    private fun showCombinedScoreDialog(opponentName: String)
+    private fun showCombinedScoreDialog(opponentName: String, data: GameSettings, db: AppDatabase)
     {
         finalDialog?.dismiss()
         val oppScore = opponentScore ?: 0
@@ -171,8 +159,34 @@ class GameActivity : AppCompatActivity()
             .setTitle("Game finished!")
             .setMessage(message)
             .setCancelable(false)
-            .setPositiveButton("Back to Menu") {_, _ -> finishAndGoToMenu() }
+            .setPositiveButton("Back to Menu") {_, _ ->
+                saveGameAndExit(myScore, data, opponentScore, db) }
             .show()
+    }
+
+    private fun saveGameAndExit(finalScore: Int, data: GameSettings, oppScore: Int?, db:AppDatabase)
+    {
+        lifecycleScope.launch(Dispatchers.IO)
+        {
+            db.gameDao().insertGameWithModes(
+                GameEntity(
+                    score = finalScore,
+                    roundNumber = data.rounds,
+                    seed = data.seed,
+                    gameTime = System.currentTimeMillis(),
+                    opponentName = if (isMultiplayer) intent.getStringExtra("OPPONENT_NAME") else null,
+                    opponentScore = oppScore
+                ),
+                modes = data.gameModes.mapIndexedNotNull{index, enabled ->
+                    if (enabled) index else null
+                }
+            )
+
+            withContext(Dispatchers.Main)
+            {
+                finishAndGoToMenu()
+            }
+        }
     }
 
     private fun finishAndGoToMenu()
@@ -184,17 +198,14 @@ class GameActivity : AppCompatActivity()
         finish()
     }
 
-    private fun ShowFinishedGameDialog(finalScore: Int)
+    private fun ShowFinishedGameDialog(finalScore: Int, data: GameSettings, db: AppDatabase)
     {
         AlertDialog.Builder(this)
             .setTitle("Game finished!")
             .setMessage("Your score: $finalScore")
             .setCancelable(false)
             .setPositiveButton("Back to Menu") {_,_ ->
-                val intent = Intent(this, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                startActivity(intent)
-                finish()
+                saveGameAndExit(finalScore, data, null, db)
             }
             .show()
 

@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity()
         val roundsInput = findViewById<EditText>(R.id.roundsInput)
         val seedInput = findViewById<EditText>(R.id.seedInput)
         val startButton = findViewById<Button>(R.id.startButton)
+        val nameInput = findViewById<EditText>(R.id.nameInput)
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
         {
@@ -134,12 +135,13 @@ class MainActivity : AppCompatActivity()
                     BluetoothConnectionManager.sendMessage(
                         BluetoothMessage(
                             messageType = "GameRules",
-                            settings = currentGameSettings
+                            settings = currentGameSettings,
+                            playerName = nameInput.text.toString().trim().ifEmpty { "Dude" }
                         )
                     )
 
                     runOnUiThread {
-                        startGameAsHost(currentGameSettings!!)
+                        startGameAsHost(currentGameSettings!!, message.playerName)
                     }
                 }
             }
@@ -164,13 +166,13 @@ class MainActivity : AppCompatActivity()
                 .setTitle("Choose a device")
                 .setItems(deviceNames) {_, which ->
                     val device = devices[which]
-                    BluetoothConnectionManager.connect(device)
+                    BluetoothConnectionManager.connect(device, nameInput.text.toString().trim().ifEmpty { "Dude" })
 
                     BluetoothConnectionManager.onMessageReceivedCallback = {message ->
                         if(message.messageType == "GameRules")
                         {
                             message.settings?.let {settings ->
-                                runOnUiThread {startGameAsClient(settings, "Example opponent name")}
+                                runOnUiThread {startGameAsClient(settings, message.playerName)}
                             }
                         }
                     }
@@ -179,12 +181,13 @@ class MainActivity : AppCompatActivity()
         }
     }
 
-    private fun startGameAsHost(settings: GameSettings)
+    private fun startGameAsHost(settings: GameSettings, opponentName: String?)
     {
         val intent = Intent(this, GameActivity::class.java).apply {
             putExtra("GAME_SETTINGS", settings)
             putExtra("MULTIPLAYER_HOST", true)
             putExtra("MULTIPLAYER", true)
+            putExtra("OPPONENT_NAME", opponentName)
         }
 
         BluetoothConnectionManager.onMessageReceivedCallback = null

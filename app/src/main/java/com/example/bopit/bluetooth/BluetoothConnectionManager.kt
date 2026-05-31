@@ -79,7 +79,7 @@ object BluetoothConnectionManager
     }
 
     @SuppressLint("MissingPermission")
-    fun connect(device: BluetoothDevice)
+    fun connect(device: BluetoothDevice, playerName: String)
     {
         Thread{
 
@@ -102,7 +102,8 @@ object BluetoothConnectionManager
 
                 sendMessage(
                     BluetoothMessage(
-                        messageType = "Hello"
+                        messageType = "Hello",
+                        playerName = playerName
                     )
                 )
             }
