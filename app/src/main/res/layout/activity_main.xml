@@ -201,14 +201,34 @@
                 android:background="@drawable/button_neon"
                 android:text="SOLO"
                 android:textColor="@color/text_light" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="24dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/mainPanel">
 
             <Button
-                android:id="@+id/multiButton"
+                android:id="@+id/hostButton"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:background="@drawable/button_neon"
+                android:text="HOST"
+                android:textColor="@color/text_light" />
+
+            <Button
+                android:id="@+id/connectButton"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
                 android:background="@drawable/button_neon"
-                android:text="HOST"
+                android:text="CONNECT"
                 android:textColor="@color/text_light" />
         </LinearLayout>
 

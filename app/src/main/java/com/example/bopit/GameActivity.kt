@@ -11,6 +11,8 @@ import androidx.appcompat.app.AlertDialog
 import kotlinx.coroutines.delay
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
+import com.example.bopit.bluetooth.BluetoothConnectionManager
+import com.example.bopit.bluetooth.BluetoothMessage
 import com.example.bopit.data.AppDatabase
 import com.example.bopit.data.GameEntity
 import kotlinx.coroutines.launch
@@ -22,10 +24,21 @@ class GameActivity : AppCompatActivity()
 
     }
 
+    private var isMultiplayer = false
+    private var isHost = false
+    private var myScore = 0
+    private var opponentScore: Int? = null
+    private var gameFinished = false
+    private var finalDialog: AlertDialog? = null
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
+
+        isMultiplayer = intent.getBooleanExtra("MULTIPLAYER", false)
+        isHost = intent.getBooleanExtra("MULTIPLAYER_HOST", false)
+        val opponentName = intent.getStringExtra("OPPONENT_NAME") ?: "Opponent"
 
         val db = Room.databaseBuilder(
             applicationContext,
@@ -49,6 +62,20 @@ class GameActivity : AppCompatActivity()
         taskDescription.text = "Be prepared..."
 
         var totalScore = 0
+
+        if(isMultiplayer)
+        {
+            BluetoothConnectionManager.onMessageReceivedCallback = { message ->
+                if(message.messageType == "MyScore")
+                {
+                    opponentScore = message.playerScore
+                    if(gameFinished)
+                    {
+                        showCombinedScoreDialog(opponentName)
+                    }
+                }
+            }
+        }
 
         lifecycleScope.launch{
 
@@ -87,6 +114,8 @@ class GameActivity : AppCompatActivity()
             }
 
             Log.d("GAME", "Game finished, final score $totalScore")
+            myScore = totalScore
+            gameFinished = true
 
             db.gameDao().insertGameWithModes(
                 GameEntity(
@@ -94,16 +123,64 @@ class GameActivity : AppCompatActivity()
                     roundNumber = data.rounds,
                     seed = data.seed,
                     gameTime = System.currentTimeMillis(),
-                    opponentName = null,
-                    opponentScore = null
+                    opponentName = if (isMultiplayer) opponentName else null,
+                    opponentScore = opponentScore
                 ),
                 modes = data.gameModes.mapIndexedNotNull{ index, enabled ->
                     if(enabled) index else null
                 }
             )
 
-            ShowFinishedGameDialog(totalScore)
+            if(isMultiplayer)
+            {
+                BluetoothConnectionManager.sendMessage(
+                    BluetoothMessage(
+                        messageType = "MyScore",
+                        playerScore = totalScore
+                    )
+                )
+
+                if(opponentScore != null)
+                {
+                    showCombinedScoreDialog(opponentName)
+                }
+                else
+                {
+                    finalDialog = AlertDialog.Builder(this@GameActivity)
+                        .setTitle("Game finished!")
+                        .setMessage("Your score: $totalScore \n Waiting for opponent...")
+                        .setCancelable(false)
+                        .setPositiveButton("Back to Menu") {_, _ -> finishAndGoToMenu() }
+                        .show()
+                }
+            }
+            else
+            {
+                ShowFinishedGameDialog(totalScore)
+            }
         }
+    }
+
+    private fun showCombinedScoreDialog(opponentName: String)
+    {
+        finalDialog?.dismiss()
+        val oppScore = opponentScore ?: 0
+        val message = "Your score: $myScore\n$opponentName score: $oppScore"
+        AlertDialog.Builder(this)
+            .setTitle("Game finished!")
+            .setMessage(message)
+            .setCancelable(false)
+            .setPositiveButton("Back to Menu") {_, _ -> finishAndGoToMenu() }
+            .show()
+    }
+
+    private fun finishAndGoToMenu()
+    {
+        BluetoothConnectionManager.disconnect()
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        startActivity(intent)
+        finish()
     }
 
     private fun ShowFinishedGameDialog(finalScore: Int)
@@ -120,5 +197,15 @@ class GameActivity : AppCompatActivity()
             }
             .show()
 
+    }
+
+    override fun onDestroy()
+    {
+        super.onDestroy()
+
+        if(isMultiplayer)
+        {
+            BluetoothConnectionManager.onMessageReceivedCallback = null
+        }
     }
 }
